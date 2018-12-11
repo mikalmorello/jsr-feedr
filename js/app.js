@@ -2,7 +2,8 @@
 
 const apiCall = new XMLHttpRequest(),
       apiKey = '690b2ae4036440e4bb69200a3701bf76',
-      baseUrl = 'https://newsapi.org/v2/top-headlines?';
+      baseUrl = 'https://newsapi.org/v2/top-headlines?',
+      mainContainer = document.getElementById('main');
 
 let country = 'us',
     sources = '',
@@ -25,7 +26,7 @@ console.log(urlParameters);
 
 // FUNCTIONS
 
-// List of urlParameters
+// Get formatted list of urlParameters for API
 function getParameters() {
   let urlParameter = '';
   let count = 0;
@@ -59,6 +60,7 @@ function handleSuccess() {
   var response = JSON.parse(apiCall.responseText);
   console.log('working');
   console.log(response);
+  createArticleList(response);
 }
 
 // API Error
@@ -66,6 +68,31 @@ function handleError() {
   console.log('oops');
 }
 
+// Create Article List
+function createArticleList(response){
+  var article = response.articles;
+  // Loop through results
+  for(let i = 0; i < article.length; i++) { 
+    mainContainer.innerHTML += 
+      `<article class="article">
+          <section class="featuredImage">
+            <img src="${article[i].urlToImage}" alt="" />
+          </section>
+          <section class="articleContent">
+              <a href="${article[i].url}"><h3>${article[i].title}</h3></a>
+              <h6>Lifestyle</h6>
+          </section>
+          <section class="impressions">
+            526
+          </section>
+          <div class="clearfix"></div>
+        </article>`;
+  }
+  console.log();
+}
+
+
+// Call API
 
 callThatAPI();
 
