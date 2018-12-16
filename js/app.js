@@ -10,7 +10,9 @@ const apiCall = new XMLHttpRequest(),
       articleLoad = document.getElementsByClassName('articleLoad'),
       search = document.getElementById('search'),
       searchButton = document.getElementById('search').getElementsByTagName('a')[0],
-      searchInput = document.getElementById('search').getElementsByTagName('input')[0];
+      searchInput = document.getElementById('search').getElementsByTagName('input')[0],
+      source = document.getElementById('source'),
+      sourceDropdown =  document.getElementById('source').getElementsByTagName('ul')[0];
 
 let country = 'us',
     sources = '',
@@ -18,6 +20,12 @@ let country = 'us',
     from = '',
     q = '',
     pageSize = '';
+
+// Array of Sources
+var  sourceList = [];
+
+// Array of Unique Sources
+var  sourceListUnique = [];
     
 // Array of variables
 var urlParameters = {
@@ -60,6 +68,7 @@ function callThatAPI() {
   apiCall.onerror = handleError; 
 }
 
+
 // API Success
 function handleSuccess() {
   var response = JSON.parse(apiCall.responseText);
@@ -67,12 +76,15 @@ function handleSuccess() {
   createArticleList(response);
   hideLoader();
   articleLoadClick(response);
+  sourceAddDropdown(response);
 }
+
 
 // API Error
 function handleError() {
   apiLoadError();
 }
+
 
 // Create Article List
 function createArticleList(response){
@@ -99,14 +111,14 @@ function createArticleList(response){
   console.log();
 }
 
-// Hide Loading Pop Up
 
+// Hide Loading Pop Up
 function hideLoader(){
   popUp.classList.add('hidden');
 }
 
-// API Load Error Message
 
+// API Load Error Message
 function apiLoadError(){
   popUpContainer.innerHTML = 'Something went wrongzy';
   popUp.classList.remove('loader');
@@ -115,7 +127,6 @@ function apiLoadError(){
 }
 
 // Article Load In Overlay
-
 function articleLoadClick(response){
   var article = response.articles;
   for (let i = 0; i < articleLoad.length; i++) {
@@ -136,16 +147,38 @@ function articleLoadClick(response){
   }
 }
 
+// Unique Array
+Array.prototype.unique = function() {
+  return this.filter(function (value, index, self) { 
+    return self.indexOf(value) === index;
+  });
+}
+
+// Populate Sources in domain
+function sourceAddDropdown(response) {
+  var article = response.articles;
+  // Create array of all domain names
+  for(let i = 0; i < article.length; i++) { 
+    console.log(article[i].source.name);
+    sourceList.push(article[i].source.name);
+  }
+  // Create array of all unique domain names
+  sourceListUnique = sourceList.unique();
+  // Render domains in drop down
+  for(let i = 0; i < sourceListUnique.length; i++) { 
+    sourceDropdown.innerHTML += `<li><a href="">${sourceListUnique[i]}</a></li>`
+  }
+    
+}
+
+
 
 // EVENTS
 
 // Call API
-
 callThatAPI();
 
-
 // Close Pop Up
-
 popUpClose.addEventListener('click', function(){
   event.preventDefault();
   popUp.classList.add('loader');
@@ -153,10 +186,7 @@ popUpClose.addEventListener('click', function(){
   popUpContainer.innerHTML = '';
 });
 
-
-
 // Expand Search
-
 searchInput.addEventListener('keyup', function(event) {
   if (event.keyCode === 13) {
     event.preventDefault();
@@ -164,13 +194,11 @@ searchInput.addEventListener('keyup', function(event) {
   }
 });
 
-
 searchButton.addEventListener('click', function(){
   event.preventDefault();
   console.log('search button clicked');
   search.classList.toggle('active');
 });
-
 
 
 // REFERENCE
