@@ -7,7 +7,10 @@ const apiCall = new XMLHttpRequest(),
       popUp = document.getElementById('popUp'),
       popUpContainer = document.getElementById('popUpContainer'),
       popUpClose = document.getElementsByClassName('closePopUp')[0],
-      articleLoad = document.getElementsByClassName('articleLoad');
+      articleLoad = document.getElementsByClassName('articleLoad'),
+      search = document.getElementById('search'),
+      searchButton = document.getElementById('search').getElementsByTagName('a')[0],
+      searchInput = document.getElementById('search').getElementsByTagName('input')[0];
 
 let country = 'us',
     sources = '',
@@ -127,7 +130,7 @@ function articleLoadClick(response){
           <p>
             ${article[i].description}
           </p>
-          <a href="${article[i].url}" class="popUpAction" target="_blank">Read more from source</a>
+          <a href="${article[i].url}" class="popUpAction" target="_blank">Read more from ${article[i].source.name}</a>
         `;
     });
   }
@@ -140,15 +143,34 @@ function articleLoadClick(response){
 
 callThatAPI();
 
+
 // Close Pop Up
 
 popUpClose.addEventListener('click', function(){
   event.preventDefault();
-  console.log('close pop up');
   popUp.classList.add('loader');
   popUp.classList.add('hidden');
   popUpContainer.innerHTML = '';
 });
+
+
+
+// Expand Search
+
+searchInput.addEventListener('keyup', function(event) {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    searchButton.click();
+  }
+});
+
+
+searchButton.addEventListener('click', function(){
+  event.preventDefault();
+  console.log('search button clicked');
+  search.classList.toggle('active');
+});
+
 
 
 // REFERENCE
