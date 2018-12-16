@@ -12,7 +12,8 @@ const apiCall = new XMLHttpRequest(),
       searchButton = document.getElementById('search').getElementsByTagName('a')[0],
       searchInput = document.getElementById('search').getElementsByTagName('input')[0],
       source = document.getElementById('source'),
-      sourceDropdown =  document.getElementById('source').getElementsByTagName('ul')[0];
+      sourceDropdown =  document.getElementById('source').getElementsByTagName('ul')[0],
+      sourceLink =  document.getElementsByClassName('filterSource');
 
 let country = 'us',
     sources = '',
@@ -77,6 +78,7 @@ function handleSuccess() {
   hideLoader();
   articleLoadClick(response);
   sourceAddDropdown(response);
+  filterArticles(response);
 }
 
 
@@ -108,7 +110,6 @@ function createArticleList(response){
           <div class="clearfix"></div>
         </article>`;
   }
-  console.log();
 }
 
 
@@ -166,10 +167,47 @@ function sourceAddDropdown(response) {
   sourceListUnique = sourceList.unique();
   // Render domains in drop down
   for(let i = 0; i < sourceListUnique.length; i++) { 
-    sourceDropdown.innerHTML += `<li><a href="">${sourceListUnique[i]}</a></li>`
+    sourceDropdown.innerHTML += `<li><a class="filterSource" href="#">${sourceListUnique[i]}</a></li>`
   }
-    
 }
+
+
+// Filter Articles based upon source
+
+function filterArticles(response){
+  // Define click event
+  for (let i = 0; i < sourceLink.length; i++) {
+    sourceLink[i].addEventListener('click', function(){
+      event.preventDefault();
+      console.log(sourceLink[i].innerHTML);
+      let filterSource = sourceLink[i].innerHTML;
+      // Filter Article list
+      var article = response.articles;
+      // Clear inner html
+      mainContainer.innerHTML = '';
+      // Loop through results
+      for(let i = 0; i < article.length; i++) { 
+        if(article[i].source.name == filterSource){
+          mainContainer.innerHTML += 
+            `<article class="article" id="${i}">
+                <section class="featuredImage">
+                  <img src="${article[i].urlToImage}" alt="" />
+                </section>
+                <section class="articleContent">
+                    <a href="#" class="articleLoad"><h3>${article[i].title}</h3></a>
+                    <h6>Lifestyle</h6> 
+                </section>
+                <section class="impressions">
+                  526
+                </section>
+                <div class="clearfix"></div>
+              </article>`;
+          }
+        }
+    });
+  }
+};
+
 
 
 
