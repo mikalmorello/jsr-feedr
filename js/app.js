@@ -5,7 +5,9 @@ const apiCall = new XMLHttpRequest(),
       baseUrl = 'https://newsapi.org/v2/top-headlines?',
       mainContainer = document.getElementById('main'),
       popUp = document.getElementById('popUp'),
-      popUpContainer = document.getElementById('popUpContainer');
+      popUpContainer = document.getElementById('popUpContainer'),
+      popUpClose = document.getElementsByClassName('closePopUp')[0],
+      articleLoad = document.getElementsByClassName('articleLoad');
 
 let country = 'us',
     sources = '',
@@ -61,6 +63,7 @@ function handleSuccess() {
   console.log(response);
   createArticleList(response);
   hideLoader();
+  articleLoadClick(response);
 }
 
 // API Error
@@ -81,8 +84,8 @@ function createArticleList(response){
             <img src="${article[i].urlToImage}" alt="" />
           </section>
           <section class="articleContent">
-              <a href="#"><h3>${article[i].title}</h3></a>
-              <h6>Lifestyle</h6>
+              <a href="#" class="articleLoad"><h3>${article[i].title}</h3></a>
+              <h6>Lifestyle</h6> 
           </section>
           <section class="impressions">
             526
@@ -108,13 +111,26 @@ function apiLoadError(){
   popUp.classList.add('error');
 }
 
-// API Load Error Message
+// Article Load In Overlay
 
-function apiLoadError(){
-  popUpContainer.innerHTML = 'Something went wrongzy';
-  popUp.classList.remove('loader');
-  popUp.classList.remove('hidden');
-  popUp.classList.add('error');
+function articleLoadClick(response){
+  var article = response.articles;
+  for (let i = 0; i < articleLoad.length; i++) {
+    articleLoad[i].addEventListener('click', function(){
+      event.preventDefault();
+      console.log('this is clicked' + i);
+      popUp.classList.remove('loader');
+      popUp.classList.remove('hidden');
+      popUpContainer.innerHTML = 
+        `
+          <h1>${article[i].title}</h1>
+          <p>
+            ${article[i].description}
+          </p>
+          <a href="${article[i].url}" class="popUpAction" target="_blank">Read more from source</a>
+        `;
+    });
+  }
 }
 
 
@@ -124,10 +140,14 @@ function apiLoadError(){
 
 callThatAPI();
 
-// Article Title Click
-searchButton.addEventListener('click', function() {
+// Close Pop Up
+
+popUpClose.addEventListener('click', function(){
   event.preventDefault();
-  console.log('article title clicked');
+  console.log('close pop up');
+  popUp.classList.add('loader');
+  popUp.classList.add('hidden');
+  popUpContainer.innerHTML = '';
 });
 
 
