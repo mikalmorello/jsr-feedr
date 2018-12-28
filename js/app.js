@@ -169,6 +169,7 @@ function sourceAddDropdown(response) {
   // Create array of all unique domain names
   sourceListUnique = sourceList.unique();
   // Render domains in drop down
+  sourceDropdown.innerHTML += `<li><a class="filterSource" href="#">All</a></li>`
   for(let i = 0; i < sourceListUnique.length; i++) { 
     sourceDropdown.innerHTML += `<li><a class="filterSource" href="#">${sourceListUnique[i]}</a></li>`
   }
@@ -184,33 +185,37 @@ function filterArticles(response){
       event.preventDefault();
       console.log(sourceLink[i].innerHTML);
       let filterSource = sourceLink[i].innerHTML;
-      // Filter Article list
-      var article = response.articles;
-      // Create Array from refined news list
-      var filterArticle = [];
-      // Clear inner html
-      mainContainer.innerHTML = '';
-      // Loop through results
-      for(let i = 0; i < article.length; i++) { 
-        if(article[i].source.name == filterSource){
-          filterArticle.push(article[i]);
-          mainContainer.innerHTML += 
-            `<article class="article" id="${i}">
-                <section class="featuredImage">
-                  <img src="${article[i].urlToImage}" alt="" />
-                </section>
-                <section class="articleContent">
-                    <a href="#" class="articleLoad"><h3>${article[i].title}</h3></a>
-                    <h6>Lifestyle</h6> 
-                </section>
-                <section class="impressions">
-                  526
-                </section>
-                <div class="clearfix"></div>
-              </article>`;
+      if(filterSource == 'All'){
+        callThatAPI();
+      } else {
+        // Filter Article list
+        var article = response.articles;
+        // Create Array from refined news list
+        var filterArticle = [];
+        // Clear inner html
+        mainContainer.innerHTML = '';
+        // Loop through results
+        for(let i = 0; i < article.length; i++) { 
+          if(article[i].source.name == filterSource){
+            filterArticle.push(article[i]);
+            mainContainer.innerHTML += 
+              `<article class="article" id="${i}">
+                  <section class="featuredImage">
+                    <img src="${article[i].urlToImage}" alt="" />
+                  </section>
+                  <section class="articleContent">
+                      <a href="#" class="articleLoad"><h3>${article[i].title}</h3></a>
+                      <h6>Lifestyle</h6> 
+                  </section>
+                  <section class="impressions">
+                    526
+                  </section>
+                  <div class="clearfix"></div>
+                </article>`;
+            }
           }
-        }
-        articleLoadClick(filterArticle);
+          articleLoadClick(filterArticle);
+      }
     });
   }
 };
