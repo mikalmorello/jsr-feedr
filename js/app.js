@@ -13,7 +13,9 @@ const apiCall = new XMLHttpRequest(),
       searchInput = document.getElementById('search').getElementsByTagName('input')[0],
       source = document.getElementById('source'),
       sourceDropdown =  document.getElementById('source').getElementsByTagName('ul')[0],
-      sourceLink =  document.getElementsByClassName('filterSource');
+      sourceLink =  document.getElementsByClassName('filterSource'),
+      logo = document.getElementsByTagName('h1')[0],
+      logoLink = logo.parentNode;
 
 let country = 'us',
     sources = '',
@@ -76,7 +78,6 @@ function handleSuccess() {
   console.log(response);
   createArticleList(response);
   hideLoader();
-  articleLoadClick(response);
   sourceAddDropdown(response);
   filterArticles(response);
 }
@@ -110,6 +111,7 @@ function createArticleList(response){
           <div class="clearfix"></div>
         </article>`;
   }
+  articleLoadClick(article);
 }
 
 
@@ -128,8 +130,9 @@ function apiLoadError(){
 }
 
 // Article Load In Overlay
-function articleLoadClick(response){
-  var article = response.articles;
+function articleLoadClick(article){
+  console.log('article overlay click'); 
+  //var article = response.articles;
   for (let i = 0; i < articleLoad.length; i++) {
     articleLoad[i].addEventListener('click', function(){
       event.preventDefault();
@@ -183,11 +186,14 @@ function filterArticles(response){
       let filterSource = sourceLink[i].innerHTML;
       // Filter Article list
       var article = response.articles;
+      // Create Array from refined news list
+      var filterArticle = [];
       // Clear inner html
       mainContainer.innerHTML = '';
       // Loop through results
       for(let i = 0; i < article.length; i++) { 
         if(article[i].source.name == filterSource){
+          filterArticle.push(article[i]);
           mainContainer.innerHTML += 
             `<article class="article" id="${i}">
                 <section class="featuredImage">
@@ -204,6 +210,7 @@ function filterArticles(response){
               </article>`;
           }
         }
+        articleLoadClick(filterArticle);
     });
   }
 };
@@ -238,6 +245,12 @@ searchButton.addEventListener('click', function(){
   search.classList.toggle('active');
 });
 
+// Feedr Logo Click
+logoLink.addEventListener('click', function(){
+  event.preventDefault();
+  console.log('feedr logo clicked');
+  callThatAPI();
+});
 
 // REFERENCE
 // https://newsapi.org/docs/endpoints/top-headlines
