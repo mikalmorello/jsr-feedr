@@ -15,13 +15,16 @@ const apiCall = new XMLHttpRequest(),
       sourceDropdown =  document.getElementById('source').getElementsByTagName('ul')[0],
       sourceLink =  document.getElementsByClassName('filterSource'),
       logo = document.getElementsByTagName('h1')[0],
-      logoLink = logo.parentNode,
-      loadMoreButton = document.getElementById('loadMoreButton');
+      //loadMoreButton = document.getElementById('loadMoreButton'),
+      logoLink = logo.parentNode;
+     
 
 let articleCount = 0,
     articleTotal = 0,
     //currentPageSize = 0,
-    defaultPageSize = 5;
+    defaultPageSize = 10, 
+    distToBottom,
+    loadingData = false;
 
 let country = 'us',
     sources = '',
@@ -79,8 +82,8 @@ function callThatAPI(newPageSize) {
   apiCall.send();
   apiCall.onload = handleSuccess;
   apiCall.onerror = handleError; 
+  apiCall.DONE = handleComplete;
 }
-
 
 // API Success
 function handleSuccess() {
@@ -90,12 +93,18 @@ function handleSuccess() {
   sourceAddDropdown(response);
   filterArticles(response);
   returnTotalResults(response);
+  //loadingDataStatus(true);
 }
 
 
 // API Error
 function handleError() {
   apiLoadError();
+}
+
+// API Error
+function handleComplete() {
+  //loadingDataStatus(false);
 }
 
 
@@ -169,6 +178,8 @@ Array.prototype.unique = function() {
 // Populate Sources in domain
 function sourceAddDropdown(response) {
   var article = response.articles;
+  // Reset Source List
+  sourceList = [];
   // Create array of all domain names
   for(let i = 0; i < article.length; i++) { 
     sourceList.push(article[i].source.name);
@@ -195,7 +206,7 @@ function filterArticles(response){
       let filterSource = sourceLink[i].innerHTML;
       if(filterSource == 'All'){
         callThatAPI(pageSize);
-        loadMoreButton.classList.remove('hidden');
+        //loadMoreButton.classList.remove('hidden');
       } else {
         // Filter Article list
         var article = response.articles;
@@ -223,7 +234,7 @@ function filterArticles(response){
                 </article>`;
             }
           }
-          loadMoreButton.classList.add('hidden');
+          //loadMoreButton.classList.add('hidden');
           articleLoadClick(filterArticle);
       }
     });
@@ -236,9 +247,26 @@ function infiniteLoad(currentPageSize) {
   return pageSize;
 }
 
-//Determine Article Total
+// Return Article Total
 function returnTotalResults(response){
   return articleTotal = response.totalResults;
+}
+
+// Get distance of page from Bottom
+function getDistFromBottom () {
+  
+  var scrollPosition = window.pageYOffset;
+  var windowSize     = window.innerHeight;
+  var bodyHeight     = document.body.offsetHeight;
+
+  return Math.max(bodyHeight - (scrollPosition + windowSize), 0);
+
+}
+
+
+// Loading Data
+function loadingDataStatus(loadStatus){
+  return loadingData = loadStatus;
 }
 
 // EVENTS
@@ -271,11 +299,12 @@ searchButton.addEventListener('click', function(){
 logoLink.addEventListener('click', function(){
   event.preventDefault();
   pageSize = defaultPageSize;
+  window.scrollTo(0, 0);
   callThatAPI(pageSize);
 });
 
 // Load More Button Click
-loadMoreButton.addEventListener('click', function() {
+/*loadMoreButton.addEventListener('click', function() {
   event.preventDefault();
   console.log('page size is ' + pageSize);
   console.log('article total is ' + articleTotal);
@@ -285,6 +314,19 @@ loadMoreButton.addEventListener('click', function() {
     return pageSize;
   } else {
     loadMoreButton.classList.add('hidden');
+  }
+});*/
+
+// Load More Infinite Scroll
+document.addEventListener('scroll', function() {
+  distToBottom = getDistFromBottom();
+  //console.log(distToBottom);
+  //if(distToBottom == 0 && articleTotal > pageSize && loadingData == false) {
+  if(distToBottom == 0 && articleTotal > pageSize) {
+    infiniteLoad(pageSize);
+    callThatAPI(pageSize);
+    console.log(pageSize);
+    return pageSize;
   }
 });
 
