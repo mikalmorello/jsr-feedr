@@ -18,16 +18,20 @@ const apiCall = new XMLHttpRequest(),
       logoLink = logo.parentNode,
       loadMoreButton = document.getElementById('loadMoreButton');
 
+let articleCount = 0,
+    articleTotal = 0,
+    //currentPageSize = 0,
+    defaultPageSize = 5;
+
 let country = 'us',
     sources = '',
     sortBy = '',
     from = '',
     q = '',
-    pageSize = '',
+    pageSize = defaultPageSize,
     page = 1;
 
-let articleCount = 0;
-let articleTotal = 0;
+
 
 // Array of Sources
 var  sourceList = [];
@@ -65,15 +69,12 @@ function getParameters() {
 
     }
   })
-  console.log ('url parameter is' + urlParameter);
-  console.log('page inside getParameters call is' + page);
   return urlParameter;
 }
 
 // API Call
-function callThatAPI(resultPage) {
-  urlParameters.page = resultPage;
-  console.log('page inside api call is' + resultPage);
+function callThatAPI(newPageSize) {
+  urlParameters.pageSize = newPageSize;
   apiCall.open('GET', `${baseUrl}${getParameters()}&apiKey=${apiKey}`);
   apiCall.send();
   apiCall.onload = handleSuccess;
@@ -84,13 +85,11 @@ function callThatAPI(resultPage) {
 // API Success
 function handleSuccess() {
   var response = JSON.parse(apiCall.responseText);
-  console.log(response);
-  console.log('result page is ' + page);
   createArticleList(response);
   hideLoader();
   sourceAddDropdown(response);
   filterArticles(response);
-  showingTotalResults(response);
+  returnTotalResults(response);
 }
 
 
@@ -104,9 +103,7 @@ function handleError() {
 function createArticleList(response){
   var article = response.articles;
   // Clear inner html
-  if(page === 1){
-    mainContainer.innerHTML = '';
-  }
+  mainContainer.innerHTML = '';
   // Loop through results
   for(let i = 0; i < article.length; i++) { 
     mainContainer.innerHTML += 
@@ -115,7 +112,7 @@ function createArticleList(response){
             <img src="${article[i].urlToImage}" alt="" />
           </section>
           <section class="articleContent">
-              <a href="#" class="articleLoad"><h3>${article[i].title}</h3></a>
+              <a href="#" class="articleLoad"><h3>${[i]} ${article[i].title}</h3></a>
               <h6>Lifestyle</h6> 
           </section>
           <section class="impressions">
@@ -178,6 +175,8 @@ function sourceAddDropdown(response) {
   }
   // Create array of all unique domain names
   sourceListUnique = sourceList.unique();
+  // Clear source list HTML
+   sourceDropdown.innerHTML = '';
   // Render domains in drop down
   sourceDropdown.innerHTML += `<li><a class="filterSource" href="#">All</a></li>`
   for(let i = 0; i < sourceListUnique.length; i++) { 
@@ -195,7 +194,8 @@ function filterArticles(response){
       event.preventDefault();
       let filterSource = sourceLink[i].innerHTML;
       if(filterSource == 'All'){
-        callThatAPI(page);
+        callThatAPI(pageSize);
+        loadMoreButton.classList.remove('hidden');
       } else {
         // Filter Article list
         var article = response.articles;
@@ -213,7 +213,7 @@ function filterArticles(response){
                     <img src="${article[i].urlToImage}" alt="" />
                   </section>
                   <section class="articleContent">
-                      <a href="#" class="articleLoad"><h3>${article[i].title}</h3></a>
+                      <a href="#" class="articleLoad"><h3>${[i]} ${article[i].title}</h3></a>
                       <h6>Lifestyle</h6> 
                   </section>
                   <section class="impressions">
@@ -223,6 +223,7 @@ function filterArticles(response){
                 </article>`;
             }
           }
+          loadMoreButton.classList.add('hidden');
           articleLoadClick(filterArticle);
       }
     });
@@ -230,30 +231,20 @@ function filterArticles(response){
 };
 
 // Determine results from infinite load
-function infiniteLoad(currentPage) {
-  console.log(currentPage);
-  page = currentPage + 1;
-  console.log(page);
-  return page;
+function infiniteLoad(currentPageSize) {
+  pageSize = currentPageSize + defaultPageSize;
+  return pageSize;
 }
 
 //Determine Article Total
-function showingTotalResults(response){
-  articleCount += response.articles.length;
-  console.log(articleCount);
-  articleTotal = response.totalResults;
-  console.log(articleTotal);
-  if(articleCount === articleTotal){
-    return true;
-  } else {
-    return false;
-  }
+function returnTotalResults(response){
+  return articleTotal = response.totalResults;
 }
 
 // EVENTS
 
 // Call API
-callThatAPI(page);
+callThatAPI(defaultPageSize);
 
 // Close Pop Up
 popUpClose.addEventListener('click', function(){
@@ -279,24 +270,22 @@ searchButton.addEventListener('click', function(){
 // Feedr Logo Click
 logoLink.addEventListener('click', function(){
   event.preventDefault();
-  page = 1;
-  callThatAPI(page);
+  pageSize = defaultPageSize;
+  callThatAPI(pageSize);
 });
 
 // Load More Button Click
 loadMoreButton.addEventListener('click', function() {
   event.preventDefault();
-  console.log('load more button clicked');
-  console.log('article count now is ' + articleCount);
-  console.log('article total now is ' + articleTotal);
-  // Allow load more if results have not reached total
-  if(articleCount != articleTotal){
-    infiniteLoad(page);
-    callThatAPI(page);
-    return page;
+  console.log('page size is ' + pageSize);
+  console.log('article total is ' + articleTotal);
+  if(articleTotal > pageSize){
+    infiniteLoad(pageSize);
+    callThatAPI(pageSize);
+    return pageSize;
+  } else {
+    loadMoreButton.classList.add('hidden');
   }
-  console.log('page is' + page);
-  
 });
 
 // REFERENCE

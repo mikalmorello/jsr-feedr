@@ -235,3 +235,7 @@ nav ul ul li {
   text-align: right;
   color: #097FB2;
 }
+
+.hidden {
+  display: none;
+}
