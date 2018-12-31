@@ -121,11 +121,11 @@ function createArticleList(response){
             <img src="${article[i].urlToImage}" alt="" />
           </section>
           <section class="articleContent">
-              <a href="#" class="articleLoad"><h3>${[i]} ${article[i].title}</h3></a>
+              <a href="#" class="articleLoad"><h3>${article[i].title}</h3></a>
               <h6>Lifestyle</h6> 
           </section>
           <section class="impressions">
-            526
+            ${[i]} 
           </section>
           <div class="clearfix"></div>
         </article>`;
@@ -224,11 +224,11 @@ function filterArticles(response){
                     <img src="${article[i].urlToImage}" alt="" />
                   </section>
                   <section class="articleContent">
-                      <a href="#" class="articleLoad"><h3>${[i]} ${article[i].title}</h3></a>
+                      <a href="#" class="articleLoad"><h3>${article[i].title}</h3></a>
                       <h6>Lifestyle</h6> 
                   </section>
                   <section class="impressions">
-                    526
+                    ${[i]}
                   </section>
                   <div class="clearfix"></div>
                 </article>`;
@@ -287,6 +287,8 @@ searchInput.addEventListener('keyup', function(event) {
   if (event.keyCode === 13) {
     event.preventDefault();
     searchButton.click();
+  } else {
+    searchFilter();
   }
 });
 
@@ -329,6 +331,30 @@ document.addEventListener('scroll', function() {
     return pageSize;
   }
 });
+
+
+// Search Filter
+function searchFilter() {
+  // Declare variables
+  let filter, 
+      article, 
+      articleLink, 
+      articleContent;
+  
+  filter = searchInput.value.toUpperCase();
+  article = mainContainer.getElementsByTagName('article');
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (i = 0; i < article.length; i++) {
+    articleLink = article[i].getElementsByTagName("a")[0];
+    articleContent = articleLink.textContent || articleLink.innerText;
+    if (articleContent.toUpperCase().indexOf(filter) > -1) {
+      article[i].style.display = "";
+    } else {
+      article[i].style.display = "none";
+    }
+  }
+}
 
 // REFERENCE
 // https://newsapi.org/docs/endpoints/top-headlines
